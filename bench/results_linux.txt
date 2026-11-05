@@ -1,0 +1,872 @@
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 14:48:53 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+ERROR: 'go' is not installed or not in PATH.
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 14:56:09 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Installing 'hey'...
+go: downloading github.com/rakyll/hey v0.1.5
+go: downloading golang.org/x/net v0.48.0
+go: downloading golang.org/x/text v0.33.0
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+go: downloading github.com/joho/godotenv v1.5.1
+go: downloading github.com/google/uuid v1.6.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+go: downloading github.com/gorilla/mux v1.8.1
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+backend listening on 127.0.0.1:8001 (latency=0s)
+stdlib ReverseProxy listening on 127.0.0.1:9090 -> http://127.0.0.1:8001
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  22985.1 req/s | Successful:  22985.0 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  23158.7 req/s | Successful:  23158.7 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  23310.4 req/s | Successful:  23310.4 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  23158.7 req/s | Reported:  23158.7 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+./bench/run_bench.sh: line 227:  6739 Killed                  "$REPO_ROOT/bench/baseline/baseline" --listen=127.0.0.1:9090 --upstream=http://127.0.0.1:8001
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  30911.5 req/s | Successful:  30911.4 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  32095.2 req/s | Successful:  32095.1 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  31705.4 req/s | Successful:  31705.3 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  31705.3 req/s | Reported:  31705.4 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+Blocking, press ctrl+c to continue...
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  30079.5 req/s | Successful:  30079.4 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  32235.7 req/s | Successful:  32235.6 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  29005.8 req/s | Successful:  29005.8 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  30079.4 req/s | Reported:  30079.5 req/s | Errors:     0 ( 0.0%) | P50:    0.0ms | P99:    0.0ms
+./bench/run_bench.sh: line 289:  6732 Killed                  "$REPO_ROOT/bench/backends/backend" --port=8001 --latency=0
+./bench/run_bench.sh: line 289:  7075 Killed                  "$REPO_ROOT/jerrycop"
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  23158.7 Successful req/s | P50:   0.0ms | P99:    0.0ms | Errors:  0.0%
+  NGINX (epoll):        31705.3 Successful req/s | P50:   0.0ms | P99:    0.0ms | Errors:  0.0%
+  JerryCop:             30079.4 Successful req/s | P50:   0.0ms | P99:    0.0ms | Errors:  0.0%
+
+========================================================
+ TEST 2: LEAST_CONNECTION vs ROUND_ROBIN under 200ms Skew
+         Backend A (8001): 0ms | Backend B (8002): 200ms
+         Clients: c=100 concurrent for 10s
+========================================================
+backend listening on 127.0.0.1:8001 (latency=0s)
+backend listening on 127.0.0.1:8002 (latency=200ms)
+cp: cannot stat '/mnt/d/programming/go/JerryCop/bench/configs/round_robin_skew.yaml': No such file or directory
+Cleaning up background processes...
+2026/11/05 14:58:38 [alert] 6920#6920: unlink() "/tmp/nginx_jerrycop.pid" failed (2: No such file or directory)
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 15:03:48 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  25038.1 req/s | Successful:  25038.1 req/s | Errors:     0 ( 0.0%) | P50:    7.1ms | P99:   23.2ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  23824.7 req/s | Successful:  23824.7 req/s | Errors:     0 ( 0.0%) | P50:    7.2ms | P99:   26.8ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  23737.1 req/s | Successful:  23737.2 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   25.5ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  23824.7 req/s | Reported:  23824.7 req/s | Errors:     0 ( 0.0%) | P50:    7.2ms | P99:   26.8ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  33363.6 req/s | Successful:  33363.5 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   12.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  31669.5 req/s | Successful:  31669.5 req/s | Errors:     0 ( 0.0%) | P50:    6.1ms | P99:   13.6ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  32470.5 req/s | Successful:  32470.5 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   12.7ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  32470.5 req/s | Reported:  32470.5 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   12.7ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  31799.0 req/s | Successful:  31799.0 req/s | Errors:     0 ( 0.0%) | P50:    5.5ms | P99:   19.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  30546.7 req/s | Successful:  30546.8 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   20.3ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  30853.0 req/s | Successful:  30852.9 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   19.5ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  30852.9 req/s | Reported:  30853.0 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   19.5ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  23824.7 Successful req/s | P50:   7.2ms | P99:   26.8ms | Errors:  0.0%
+  NGINX (epoll):        32470.5 Successful req/s | P50:   6.0ms | P99:   12.7ms | Errors:  0.0%
+  JerryCop:             30852.9 Successful req/s | P50:   5.6ms | P99:   19.5ms | Errors:  0.0%
+
+========================================================
+ TEST 2: LEAST_CONNECTION vs ROUND_ROBIN under 200ms Skew
+         Backend A (8001): 0ms | Backend B (8002): 200ms
+         Clients: c=100 concurrent for 10s
+========================================================
+
+--- TEST 2 SUMMARY (ROUND_ROBIN vs LEAST_CONNECTION under 200ms Skew) ---
+  ROUND_ROBIN:         970.4 req/s | P50:  200.3ms | P99:  211.7ms | Split: 50.0% fast / 50.0% slow
+  LEAST_CONNECTION:  26735.7 req/s | P50:    1.5ms | P99:   24.7ms | Split: 99.1% fast / 0.9% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  943.5 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2481.4 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  19535.4/s |    19535.1/s |      0 |    0.0% |   1.8ms |  15.3ms |
+  |         100 |  28813.6/s |    28813.5/s |      0 |    0.0% |   2.9ms |  10.5ms |
+  |         200 |  27684.2/s |    27684.0/s |      0 |    0.0% |   5.9ms |  23.0ms |
+  |         500 |  29553.5/s |    29554.3/s |      0 |    0.0% |  13.7ms |  50.1ms |
+  |        1000 |  28402.1/s |    28402.6/s |      0 |    0.0% |  28.7ms |  96.8ms |
+  |        2000 |  26351.9/s |    26351.8/s |      0 |    0.0% |  56.9ms | 244.8ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...
+2026/11/05 15:06:45 [alert] 7568#7568: unlink() "/tmp/nginx_jerrycop.pid" failed (2: No such file or directory)
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 15:12:20 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  25803.7 req/s | Successful:  25803.8 req/s | Errors:     0 ( 0.0%) | P50:    6.9ms | P99:   22.9ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  23934.3 req/s | Successful:  23934.3 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   24.9ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  22963.5 req/s | Successful:  22963.6 req/s | Errors:     0 ( 0.0%) | P50:    7.5ms | P99:   27.2ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  23934.3 req/s | Reported:  23934.3 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   24.9ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  33828.5 req/s | Successful:  33828.5 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   12.5ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  32509.7 req/s | Successful:  32509.7 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   12.8ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  32664.2 req/s | Successful:  32664.0 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   13.9ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  32664.0 req/s | Reported:  32664.2 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   13.9ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  31648.0 req/s | Successful:  31648.1 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   18.6ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  30579.4 req/s | Successful:  30579.4 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   20.1ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  30239.7 req/s | Successful:  30239.7 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   22.6ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  30579.4 req/s | Reported:  30579.4 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   20.1ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  23934.3 Successful req/s | P50:   7.3ms | P99:   24.9ms | Errors:  0.0%
+  NGINX (epoll):        32664.0 Successful req/s | P50:   5.8ms | P99:   13.9ms | Errors:  0.0%
+  JerryCop:             30579.4 Successful req/s | P50:   5.7ms | P99:   20.1ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+2026/11/05 15:14:54 [emerg] 8983#8983: bind() to 127.0.0.1:9092 failed (98: Address already in use)
+2026/11/05 15:14:54 [emerg] 8983#8983: bind() to 127.0.0.1:9092 failed (98: Address already in use)
+2026/11/05 15:14:54 [emerg] 8983#8983: bind() to 127.0.0.1:9092 failed (98: Address already in use)
+2026/11/05 15:14:54 [emerg] 8983#8983: bind() to 127.0.0.1:9092 failed (98: Address already in use)
+2026/11/05 15:14:54 [emerg] 8983#8983: bind() to 127.0.0.1:9092 failed (98: Address already in use)
+2026/11/05 15:14:54 [emerg] 8983#8983: still could not bind()
+Cleaning up background processes...
+2026/11/05 15:14:57 [alert] 8512#8512: unlink() "/tmp/nginx_jerrycop.pid" failed (2: No such file or directory)
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 15:16:16 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  23648.0 req/s | Successful:  23648.0 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   27.7ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  24189.6 req/s | Successful:  24189.7 req/s | Errors:     0 ( 0.0%) | P50:    7.0ms | P99:   27.7ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  24367.2 req/s | Successful:  24367.1 req/s | Errors:     0 ( 0.0%) | P50:    7.2ms | P99:   24.7ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  24189.7 req/s | Reported:  24189.6 req/s | Errors:     0 ( 0.0%) | P50:    7.0ms | P99:   27.7ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  31968.8 req/s | Successful:  31968.7 req/s | Errors:     0 ( 0.0%) | P50:    6.2ms | P99:   12.3ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  33085.9 req/s | Successful:  33085.9 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   12.4ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  32657.0 req/s | Successful:  32656.9 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   12.4ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  32656.9 req/s | Reported:  32657.0 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   12.4ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  31717.0 req/s | Successful:  31717.1 req/s | Errors:     0 ( 0.0%) | P50:    5.5ms | P99:   19.4ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  31106.4 req/s | Successful:  31106.4 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   19.5ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  28261.8 req/s | Successful:  28261.8 req/s | Errors:     0 ( 0.0%) | P50:    6.1ms | P99:   22.2ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  31106.4 req/s | Reported:  31106.4 req/s | Errors:     0 ( 0.0%) | P50:    5.6ms | P99:   19.5ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  24189.7 Successful req/s | P50:   7.0ms | P99:   27.7ms | Errors:  0.0%
+  NGINX (epoll):        32656.9 Successful req/s | P50:   6.0ms | P99:   12.4ms | Errors:  0.0%
+  JerryCop:             31106.4 Successful req/s | P50:   5.6ms | P99:   19.5ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+--- Testing NGINX LEAST_CONN (4 backends) ---
+
+--- TEST 2 SUMMARY: 4-BACKEND LATENCY SKEW (3 Fast @ 0ms, 1 Outlier @ 200ms) ---
+  JerryCop ROUND_ROBIN:         1907.6 req/s | P50:    1.7ms | P99:  208.7ms | Traffic Split: 75.0% fast / 25.0% slow
+  NGINX ROUND_ROBIN:            1929.2 req/s | P50:    1.6ms | P99:  204.7ms | Traffic Split: 75.0% fast / 25.0% slow
+  JerryCop LEAST_CONNECTION:   28347.4 req/s | P50:    2.1ms | P99:   11.2ms | Traffic Split: 99.6% fast / 0.4% slow
+  NGINX LEAST_CONN:            27211.1 req/s | P50:    2.7ms | P99:    7.6ms | Traffic Split: 99.6% fast / 0.4% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  950.1 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2468.5 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  19871.7/s |    19872.0/s |      0 |    0.0% |   1.7ms |  17.5ms |
+  |         100 |  29252.7/s |    29253.5/s |      0 |    0.0% |   2.8ms |  10.7ms |
+  |         200 |  27569.2/s |    27569.5/s |      0 |    0.0% |   6.0ms |  22.1ms |
+  |         500 |  30270.3/s |    30270.0/s |      0 |    0.0% |  13.1ms |  69.9ms |
+  |        1000 |  24525.1/s |    24525.4/s |      0 |    0.0% |  31.4ms | 134.9ms |
+  |        2000 |  22749.8/s |    22750.0/s |      0 |    0.0% |  70.8ms | 276.8ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 17:31:48 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  25415.0 req/s | Successful:  25415.1 req/s | Errors:     0 ( 0.0%) | P50:    6.9ms | P99:   22.8ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  24201.6 req/s | Successful:  24201.5 req/s | Errors:     0 ( 0.0%) | P50:    7.2ms | P99:   24.7ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  23613.0 req/s | Successful:  23613.0 req/s | Errors:     0 ( 0.0%) | P50:    7.4ms | P99:   25.7ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  24201.5 req/s | Reported:  24201.6 req/s | Errors:     0 ( 0.0%) | P50:    7.2ms | P99:   24.7ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  33308.7 req/s | Successful:  33308.7 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   12.5ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  33522.5 req/s | Successful:  33522.4 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   12.4ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  32006.5 req/s | Successful:  32006.6 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   13.0ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  33308.7 req/s | Reported:  33308.7 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   12.5ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  30930.7 req/s | Successful:  30930.7 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   19.2ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  30224.5 req/s | Successful:  30224.5 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   20.4ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  30496.0 req/s | Successful:  30495.9 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   20.2ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  30495.9 req/s | Reported:  30496.0 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   20.2ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  24201.5 Successful req/s | P50:   7.2ms | P99:   24.7ms | Errors:  0.0%
+  NGINX (epoll):        33308.7 Successful req/s | P50:   5.8ms | P99:   12.5ms | Errors:  0.0%
+  JerryCop:             30495.9 Successful req/s | P50:   5.7ms | P99:   20.2ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+--- Testing NGINX LEAST_CONN (4 backends) ---
+
+--- TEST 2 SUMMARY: 4-BACKEND LATENCY SKEW (3 Fast @ 0ms, 1 Outlier @ 200ms) ---
+  JerryCop ROUND_ROBIN:         1892.8 req/s | P50:    1.8ms | P99:  206.6ms | Traffic Split: 75.0% fast / 25.0% slow
+  NGINX ROUND_ROBIN:            1931.0 req/s | P50:    1.7ms | P99:  204.9ms | Traffic Split: 75.0% fast / 25.0% slow
+  JerryCop LEAST_CONNECTION:   27716.9 req/s | P50:    2.1ms | P99:   11.4ms | Traffic Split: 99.5% fast / 0.5% slow
+  NGINX LEAST_CONN:            26679.8 req/s | P50:    2.7ms | P99:    7.8ms | Traffic Split: 99.6% fast / 0.4% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  947.1 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2445.7 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  19005.5/s |    19005.6/s |      0 |    0.0% |   1.8ms |  17.4ms |
+  |         100 |  28582.2/s |    28582.9/s |      0 |    0.0% |   2.8ms |  12.0ms |
+  |         200 |  28043.7/s |    28044.2/s |      0 |    0.0% |   6.0ms |  22.0ms |
+  |         500 |  32435.8/s |    32435.9/s |      0 |    0.0% |  12.1ms |  62.5ms |
+  |        1000 |  28825.6/s |    28825.1/s |      0 |    0.0% |  27.8ms | 117.7ms |
+  |        2000 |  25752.5/s |    25752.0/s |      0 |    0.0% |  60.1ms | 275.3ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 17:42:19 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  23599.0 req/s | Successful:  23599.0 req/s | Errors:     0 ( 0.0%) | P50:    7.4ms | P99:   25.9ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  24306.4 req/s | Successful:  24306.4 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   24.6ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  23856.0 req/s | Successful:  23856.1 req/s | Errors:     0 ( 0.0%) | P50:    7.4ms | P99:   25.1ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  23856.1 req/s | Reported:  23856.0 req/s | Errors:     0 ( 0.0%) | P50:    7.4ms | P99:   25.1ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  28943.3 req/s | Successful:  28943.3 req/s | Errors:     0 ( 0.0%) | P50:    6.4ms | P99:   17.8ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  30117.4 req/s | Successful:  30117.3 req/s | Errors:     0 ( 0.0%) | P50:    6.3ms | P99:   15.0ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  28985.9 req/s | Successful:  28985.9 req/s | Errors:     0 ( 0.0%) | P50:    6.6ms | P99:   14.4ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  28985.9 req/s | Reported:  28985.9 req/s | Errors:     0 ( 0.0%) | P50:    6.6ms | P99:   14.4ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  29000.3 req/s | Successful:  29000.3 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   21.0ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  27835.8 req/s | Successful:  27835.9 req/s | Errors:     0 ( 0.0%) | P50:    6.2ms | P99:   22.7ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  29590.6 req/s | Successful:  29590.6 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   21.1ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  29000.3 req/s | Reported:  29000.3 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   21.0ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  23856.1 Successful req/s | P50:   7.4ms | P99:   25.1ms | Errors:  0.0%
+  NGINX (epoll):        28985.9 Successful req/s | P50:   6.6ms | P99:   14.4ms | Errors:  0.0%
+  JerryCop:             29000.3 Successful req/s | P50:   6.0ms | P99:   21.0ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+--- Testing NGINX LEAST_CONN (4 backends) ---
+
+--- TEST 2 SUMMARY: 4-BACKEND LATENCY SKEW (3 Fast @ 0ms, 1 Outlier @ 200ms) ---
+  JerryCop ROUND_ROBIN:         1920.8 req/s | P50:    1.7ms | P99:  206.2ms | Traffic Split: 75.0% fast / 25.0% slow
+  NGINX ROUND_ROBIN:            1933.4 req/s | P50:    1.6ms | P99:  204.8ms | Traffic Split: 75.0% fast / 25.0% slow
+  JerryCop LEAST_CONNECTION:   27847.2 req/s | P50:    2.1ms | P99:   11.8ms | Traffic Split: 99.5% fast / 0.5% slow
+  NGINX LEAST_CONN:            26642.2 req/s | P50:    2.7ms | P99:    7.6ms | Traffic Split: 99.6% fast / 0.4% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  950.0 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2381.6 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  19840.1/s |    19839.7/s |      0 |    0.0% |   1.8ms |  14.3ms |
+  |         100 |  29355.8/s |    29356.5/s |      0 |    0.0% |   2.8ms |  10.9ms |
+  |         200 |  27220.9/s |    27221.3/s |      0 |    0.0% |   6.1ms |  22.6ms |
+  |         500 |  29824.5/s |    29824.0/s |      0 |    0.0% |  13.1ms |  59.8ms |
+  |        1000 |  26413.7/s |    26413.1/s |      0 |    0.0% |  27.4ms | 132.2ms |
+  |        2000 |  26505.7/s |    26505.5/s |      0 |    0.0% |  62.6ms | 189.0ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 17:45:46 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  24877.4 req/s | Successful:  24877.3 req/s | Errors:     0 ( 0.0%) | P50:    7.0ms | P99:   23.7ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  23877.3 req/s | Successful:  23877.3 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   25.3ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  23833.7 req/s | Successful:  23833.7 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   25.1ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  23877.3 req/s | Reported:  23877.3 req/s | Errors:     0 ( 0.0%) | P50:    7.3ms | P99:   25.3ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  32878.5 req/s | Successful:  32878.4 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   11.7ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  31275.9 req/s | Successful:  31275.9 req/s | Errors:     0 ( 0.0%) | P50:    6.2ms | P99:   12.9ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  31798.3 req/s | Successful:  31798.2 req/s | Errors:     0 ( 0.0%) | P50:    6.1ms | P99:   12.7ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  31798.2 req/s | Reported:  31798.3 req/s | Errors:     0 ( 0.0%) | P50:    6.1ms | P99:   12.7ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  31878.0 req/s | Successful:  31878.0 req/s | Errors:     0 ( 0.0%) | P50:    5.5ms | P99:   18.4ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  29443.0 req/s | Successful:  29443.1 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   21.2ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  30143.2 req/s | Successful:  30143.2 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   20.5ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  30143.2 req/s | Reported:  30143.2 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   20.5ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  23877.3 Successful req/s | P50:   7.3ms | P99:   25.3ms | Errors:  0.0%
+  NGINX (epoll):        31798.2 Successful req/s | P50:   6.1ms | P99:   12.7ms | Errors:  0.0%
+  JerryCop:             30143.2 Successful req/s | P50:   5.8ms | P99:   20.5ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+--- Testing NGINX LEAST_CONN (4 backends) ---
+
+--- TEST 2 SUMMARY: 4-BACKEND LATENCY SKEW (3 Fast @ 0ms, 1 Outlier @ 200ms) ---
+  JerryCop ROUND_ROBIN:         1907.7 req/s | P50:    1.8ms | P99:  207.1ms | Traffic Split: 75.0% fast / 25.0% slow
+  NGINX ROUND_ROBIN:            1938.6 req/s | P50:    1.4ms | P99:  205.3ms | Traffic Split: 75.0% fast / 25.0% slow
+  JerryCop LEAST_CONNECTION:   28190.1 req/s | P50:    2.1ms | P99:   11.7ms | Traffic Split: 99.6% fast / 0.4% slow
+  NGINX LEAST_CONN:            27236.7 req/s | P50:    2.7ms | P99:    7.6ms | Traffic Split: 99.6% fast / 0.4% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  940.2 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2401.0 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  19994.6/s |    19994.4/s |      0 |    0.0% |   1.8ms |  14.2ms |
+  |         100 |  29797.5/s |    29797.4/s |      0 |    0.0% |   2.8ms |  10.9ms |
+  |         200 |  28100.1/s |    28099.4/s |      0 |    0.0% |   5.8ms |  22.3ms |
+  |         500 |  31098.1/s |    31098.4/s |      0 |    0.0% |  13.0ms |  63.5ms |
+  |        1000 |  27078.8/s |    27078.3/s |      0 |    0.0% |  29.7ms | 122.7ms |
+  |        2000 |  28385.7/s |    28386.5/s |      0 |    0.0% |  57.2ms | 196.8ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...
+========================================================
+ JerryCop Linux / WSL2 Benchmark Suite
+ Date: Thu Nov  5 18:12:39 UTC 2026
+ CPU Cores: 8
+ Test 1 Duration: 10s | Runs: 3
+========================================================
+Cleaning up background processes...
+
+--- Compiling Go binaries for Linux ---
+Build complete.
+
+========================================================
+ TEST 1: Throughput -- stdlib vs NGINX vs Caddy vs JerryCop
+         Single fast backend (0ms latency), c=200, -z 10s
+         Includes warm-up pass; reports median of 3 runs
+========================================================
+
+--------------------------------------------------------
+ Go stdlib ReverseProxy -> 8001
+ Target: http://127.0.0.1:9090/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 1: Reported:  22943.9 req/s | Successful:  22943.9 req/s | Errors:     0 ( 0.0%) | P50:    7.5ms | P99:   27.5ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 2: Reported:  23238.1 req/s | Successful:  23238.0 req/s | Errors:     0 ( 0.0%) | P50:    7.4ms | P99:   26.1ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9090/
+   Run 3: Reported:  22796.5 req/s | Successful:  22796.4 req/s | Errors:     0 ( 0.0%) | P50:    7.6ms | P99:   28.0ms
+
+ >>> MEDIAN for Go stdlib ReverseProxy -> 8001:
+     Successful:  22943.9 req/s | Reported:  22943.9 req/s | Errors:     0 ( 0.0%) | P50:    7.5ms | P99:   27.5ms
+
+--------------------------------------------------------
+ NGINX (epoll) -> 8001
+ Target: http://127.0.0.1:9092/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 1: Reported:  33492.6 req/s | Successful:  33492.7 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   12.4ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 2: Reported:  31541.0 req/s | Successful:  31540.8 req/s | Errors:     0 ( 0.0%) | P50:    6.0ms | P99:   12.9ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:9092/
+   Run 3: Reported:  32699.9 req/s | Successful:  32700.0 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   12.2ms
+
+ >>> MEDIAN for NGINX (epoll) -> 8001:
+     Successful:  32700.0 req/s | Reported:  32699.9 req/s | Errors:     0 ( 0.0%) | P50:    5.9ms | P99:   12.2ms
+
+--------------------------------------------------------
+ JerryCop (Single Backend) -> 8001
+ Target: http://127.0.0.1:8080/
+--------------------------------------------------------
+ [Warmup] Sending warm-up traffic (-z 3s -c 100 -t 10)...
+ [Run 1/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 1: Reported:  29980.0 req/s | Successful:  29979.9 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   21.6ms
+ [Run 2/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 2: Reported:  30422.7 req/s | Successful:  30422.7 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   19.7ms
+ [Run 3/3] hey -z 10s -c 200 -t 10 http://127.0.0.1:8080/
+   Run 3: Reported:  29546.0 req/s | Successful:  29545.9 req/s | Errors:     0 ( 0.0%) | P50:    5.8ms | P99:   21.3ms
+
+ >>> MEDIAN for JerryCop (Single Backend) -> 8001:
+     Successful:  29979.9 req/s | Reported:  29980.0 req/s | Errors:     0 ( 0.0%) | P50:    5.7ms | P99:   21.6ms
+
+--- TEST 1 HEAD-TO-HEAD SUMMARY (Median of 3 Runs) ---
+  stdlib ReverseProxy:  22943.9 Successful req/s | P50:   7.5ms | P99:   27.5ms | Errors:  0.0%
+  NGINX (epoll):        32700.0 Successful req/s | P50:   5.9ms | P99:   12.2ms | Errors:  0.0%
+  JerryCop:             29979.9 Successful req/s | P50:   5.7ms | P99:   21.6ms | Errors:  0.0%
+
+========================================================
+ TEST 2: Multi-Backend Latency Skew (4 Upstreams)
+         Backends: 3 Fast (0ms) on 8001, 8002, 8003
+                   1 Slow (200ms) on 8004
+         Clients: c=100 concurrent for 10s
+         Comparing JerryCop vs. NGINX on RR and Least-Conn
+========================================================
+
+--- Testing JerryCop ROUND_ROBIN (4 backends) ---
+--- Testing JerryCop LEAST_CONNECTION (4 backends) ---
+--- Testing NGINX ROUND_ROBIN (4 backends) ---
+--- Testing NGINX LEAST_CONN (4 backends) ---
+
+--- TEST 2 SUMMARY: 4-BACKEND LATENCY SKEW (3 Fast @ 0ms, 1 Outlier @ 200ms) ---
+  JerryCop ROUND_ROBIN:         1884.3 req/s | P50:    1.9ms | P99:  207.4ms | Traffic Split: 75.0% fast / 25.0% slow
+  NGINX ROUND_ROBIN:            1937.2 req/s | P50:    1.0ms | P99:  206.6ms | Traffic Split: 75.0% fast / 25.0% slow
+  JerryCop LEAST_CONNECTION:   27984.4 req/s | P50:    2.1ms | P99:   11.0ms | Traffic Split: 99.5% fast / 0.5% slow
+  NGINX LEAST_CONN:            25902.7 req/s | P50:    2.8ms | P99:    8.2ms | Traffic Split: 99.5% fast / 0.5% slow
+
+========================================================
+ TEST 3: Overload / Concurrency Limiter Verification
+         Backend: 100ms latency, Clients: c=300 concurrent
+         Expectation: MaxConcReq=100 limits backend in-flight
+         concurrency to <= 100 and caps throughput near 1,000 req/s
+========================================================
+
+--- TEST 3 SUMMARY (Limiter Verification on 100ms Backend) ---
+  MaxConcReq=100:   Throughput:  942.4 req/s | Backend Peak In-Flight:  100 | Errors: 0
+  Unconstrained:    Throughput: 2452.0 req/s | Backend Peak In-Flight:  300 | Errors: 0
+
+========================================================
+ TEST 4: Concurrency Scaling Sweep (Successful req/s)
+         Single fast backend (0ms), JerryCop Single Backend
+         50,000 requests per tier
+========================================================
+
+  | Concurrency | Reported/s | Successful/s | Errors | Error % |   P50   |   P99   |
+  |-------------|------------|--------------|--------|---------|---------|---------|
+  |          50 |  18576.6/s |    18576.3/s |      0 |    0.0% |   1.8ms |  17.2ms |
+  |         100 |  27732.0/s |    27731.6/s |      0 |    0.0% |   2.9ms |  11.0ms |
+  |         200 |  26408.2/s |    26407.5/s |      0 |    0.0% |   6.1ms |  25.2ms |
+  |         500 |  26684.5/s |    26685.2/s |      0 |    0.0% |  14.0ms |  76.2ms |
+  |        1000 |  27260.6/s |    27261.3/s |      0 |    0.0% |  28.9ms | 120.8ms |
+  |        2000 |  23083.0/s |    23083.0/s |      0 |    0.0% |  65.5ms | 282.5ms |
+
+========================================================
+ All Linux / WSL2 tests complete! Results saved to bench/results_linux.txt
+========================================================
+Cleaning up background processes...

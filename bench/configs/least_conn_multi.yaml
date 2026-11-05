@@ -1,0 +1,16 @@
+Proxy:
+  ProxyPort: ":8080"
+  NumWorkers: 3000
+  MaxConcReq: 20000
+  DistAlgo: LEAST_CONNECTION
+
+Servers:
+  Backend:
+    Routing:
+      Prefix: /
+      ProxyPass:
+        - http://127.0.0.1:8001
+        - http://127.0.0.1:8002
+        - http://127.0.0.1:8003
+        - http://127.0.0.1:8004
+

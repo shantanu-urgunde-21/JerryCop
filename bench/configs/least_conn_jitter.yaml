@@ -1,0 +1,17 @@
+Proxy:
+  ProxyPort: ":8080"
+  NumWorkers: 3000
+  MaxConcReq: 20000
+  DistAlgo: LEAST_CONNECTION
+
+Servers:
+  Backend:
+    Routing:
+      # Backend 8001: fast (0ms latency)
+      # Backend 8002: slow (50ms latency)
+      # LEAST_CONNECTION should drain 8001 and avoid piling on 8002.
+      Prefix: /
+      ProxyPass:
+        - http://127.0.0.1:8001
+        - http://127.0.0.1:8002
+

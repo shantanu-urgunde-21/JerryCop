@@ -1,0 +1,13 @@
+Proxy:
+  ProxyPort: ":8080"
+  NumWorkers: 3000
+  MaxConcReq: 20000
+  DistAlgo: ROUND_ROBIN
+
+Servers:
+  Backend:
+    Routing:
+      Prefix: /
+      ProxyPass:
+        - http://127.0.0.1:8001
+
