@@ -1,0 +1,44 @@
+Proxy:
+  ProxyPort: ":8080"
+  NumWorkers: 3000
+  MaxConcReq: 20000
+  DistAlgo: ROUND_ROBIN
+
+Servers:
+  Server1:
+    ServerPorts:
+      - "8001"
+      - "8002"
+    Names:
+      - backend1
+      - backend2
+    Routing:
+      - Prefix: /
+        ProxyPass:
+          - http://127.0.0.1:8001
+          - http://127.0.0.1:8002
+        ProxyHeaders:
+          Host: localhost
+          XRealIP: 127.0.0.1
+          XForwardedFor: 127.0.0.1
+      - Prefix: /static
+        ProxyPass:
+          - http://127.0.0.1:8004
+        ProxyHeaders:
+          Host: localhost
+          XRealIP: 127.0.0.1
+          XForwardedFor: 127.0.0.1
+
+  Server2:
+    ServerPorts:
+      - "8003"
+    Names:
+      - api_backend
+    Routing:
+      Prefix: /api
+      ProxyPass:
+        - http://127.0.0.1:8003
+      ProxyHeaders:
+        Host: localhost
+        XRealIP: 127.0.0.1
+        XForwardedFor: 127.0.0.1
